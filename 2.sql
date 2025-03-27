@@ -23,3 +23,31 @@ CREATE INDEX idx_flights_dep_sched_arr ON flights(departure_airport, scheduled_d
 CREATE INDEX idx_ticket_flights_flight_id_fare ON ticket_flights(flight_id, fare_conditions);
 CREATE INDEX idx_seats_aircraft_fare ON seats(aircraft_code, fare_conditions);
 CREATE INDEX idx_flights_dep_arr_sched_status ON flights(departure_airport, arrival_airport, scheduled_departure, status);
+
+
+
+CREATE INDEX idx_flights_dep_sched_arr_status ON flights(
+    departure_airport, 
+    scheduled_departure, 
+    arrival_airport, 
+    status
+) WHERE status <> 'Cancelled';
+
+CREATE INDEX idx_flights_dep_arr_sched_actual ON flights(
+    departure_airport, 
+    arrival_airport, 
+    scheduled_departure
+) INCLUDE (actual_arrival) 
+WHERE actual_arrival IS NOT NULL;
+
+CREATE INDEX idx_boarding_passes_flight_id_ticket ON boarding_passes(flight_id, ticket_no);
+
+CREATE INDEX idx_tf_flight_id_fare_amount ON ticket_flights(flight_id, fare_conditions) 
+INCLUDE (amount) 
+WHERE fare_conditions = 'Economy';
+
+CREATE INDEX idx_flights_dep_arr_sched_filtered ON flights(
+    departure_airport, 
+    arrival_airport, 
+    scheduled_departure
+) WHERE status <> 'Cancelled';
