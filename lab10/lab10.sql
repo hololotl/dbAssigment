@@ -16,6 +16,7 @@ create table Rates (
 	ConversionRate int
 );
 
+
 INSERT INTO Rates (CurrencyFrom, CurrencyTo, ConversionRate) VALUES
 ('USD', 'EUR', 0.92),
 ('EUR', 'USD', 1.09),
@@ -27,35 +28,30 @@ INSERT INTO Rates (CurrencyFrom, CurrencyTo, ConversionRate) VALUES
 create or replace function do_transactions()
 returns table(ID int, OwnerName varchar(100),Balance int, Currency varchar(3)) as $$
 Begin
-	Begin
-		update accounts set balance = balance - 200 where id = 1;
-		update accounts set balance = balance + (200 * 
-		(select ConversionRate from rates where CurrencyFrom = 'USD' and CurrencyTo = 'EUR')) 
-		where id = 2;
+	update accounts as a set balance = a.balance - 200 where a.id = 1;
+	update accounts as a set balance = a.balance + (200 * 
+	(select ConversionRate from rates where CurrencyFrom = 'USD' and CurrencyTo = 'EUR')) 
+	where a.id = 2;
 	
-		update accounts set balance = balance - 300 where id = 2;
-		update accounts set balance = balance + (300 * 
-		(select ConversionRate from rates where CurrencyFrom = 'EUR' and CurrencyTo = 'RUB')) 
-		where id = 3;
+	update accounts as a set balance = a.balance - 300 where a.id = 2;
+	update accounts as a set balance = a.balance + (300 * 
+	(select ConversionRate from rates where CurrencyFrom = 'EUR' and CurrencyTo = 'RUB')) 
+	where a.id = 3;
 	
-		update accounts set balance = balance - 1000 where id = 3;
-		update accounts set balance = balance + (1000 * 
-		(select ConversionRate from rates where CurrencyFrom = 'RUB' and CurrencyTo = 'USD')) 
-		where id = 1;
+	update accounts as a set balance = a.balance - 1000 where a.id = 3;
+	update accounts as a set balance = a.balance + (1000 * 
+	(select ConversionRate from rates where CurrencyFrom = 'RUB' and CurrencyTo = 'USD')) 
+	where a.id = 1;
 	
-		return a.ID, a.OwnerName, a.Balance, a.Currency from accounts a;
+    RETURN QUERY SELECT a.ID, a.OwnerName, a.Balance, a.Currency FROM accounts a;
 
-	EXCEPTION WHEN OTHERS THEN
-        ROLLBACK;
-        RAISE EXCEPTION 'Error during transactions: %', SQLERRM;
-    END;
-	return;
 end;
 $$ language plpgsql;
 
 Begin;
 select * from do_transactions();
 rollback;
+
 
 	
 	
